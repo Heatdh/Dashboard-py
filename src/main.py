@@ -96,11 +96,12 @@ fig.add_annotation(x=xmax, y=ymax,
 
 
 app.layout = html.Div(children=[
-    html.H1(children='Covid Interactive dashboard'),
+    html.Center(html.H1(children='Covid Interactive dashboard')),
 
-    html.Div(children='''
-        Dash: A web application framework for Python.
-    '''),
+    dcc.Markdown('''
+        This dashboard gives an overview about the current covid situation in **germany** as well as the **progress** and **details** about the **vaccination**.
+    ''',style={ 'fontSize': 16}),
+    html.Br(),
     dcc.Dropdown(
     options=[
         {'label': 'Bayern', 'value': 'BY'},
