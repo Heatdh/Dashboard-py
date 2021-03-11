@@ -95,12 +95,13 @@ fig.add_annotation(x=xmax, y=ymax,
             yshift=ymax+10)
 
 
-app.layout = html.Div(children=[
+app.layout = html.Div([
     html.Center(html.H1(children='Covid Interactive dashboard')),
 
     dcc.Markdown('''
         This dashboard gives an overview about the current covid situation in **germany** as well as the **progress** and **details** about the **vaccination**.
     ''',style={ 'fontSize': 16}),
+    html.Div([
     html.Br(),
     dcc.Dropdown(
     options=[
@@ -108,11 +109,11 @@ app.layout = html.Div(children=[
         {'label': 'Berlin', 'value': 'BE'},
         {'label': 'Nordhein-Westfalen', 'value': 'NW'},
         {'label': 'Sachsen', 'value': 'SE'},
-        {'label': 'Thüringen', 'value': 'TH'},
-        {'label': 'All cities', 'value': 'All'}
+        {'label': 'Thüringen', 'value': 'TH'}
     ],
     placeholder="Select a region",
-    value ='All'
+    value =['BY','BE','NW','SE','TH'],
+    multi=True
  ),  
     dcc.Slider(
     min=1,
@@ -125,6 +126,8 @@ app.layout = html.Div(children=[
         id='7 week inzidenz',
         figure=fig
     )
+    ]
+    ,style={'width': '55%', 'display': 'inline-block'})
     
 ])
 
