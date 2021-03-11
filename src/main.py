@@ -10,9 +10,16 @@ from plotly.subplots import make_subplots
 import numpy as np
 
 
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+
+
+
+
+
 df_vac1_repartion = pd.read_csv(Path(__file__).parent.parent /'dataset/first dosage.csv')
 df_vac2_repartion = pd.read_csv(Path(__file__).parent.parent /'dataset/second dosage.csv')
-
 
 #print(df_vac2_repartion)
 BY = pd.read_csv("https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-BY.tsv",sep="\t")
@@ -86,4 +93,42 @@ fig.add_annotation(x=xmax, y=ymax,
             showarrow=True,
             arrowhead=1,
             yshift=ymax+10)
-fig.show()
+
+
+app.layout = html.Div(children=[
+    html.H1(children='Covid Interactive dashboard'),
+
+    html.Div(children='''
+        Dash: A web application framework for Python.
+    '''),
+    dcc.Dropdown(
+    options=[
+        {'label': 'Bayern', 'value': 'BY'},
+        {'label': 'Berlin', 'value': 'BE'},
+        {'label': 'Nordhein-Westfalen', 'value': 'NW'},
+        {'label': 'Sachsen', 'value': 'SE'},
+        {'label': 'Thüringen', 'value': 'TH'},
+        {'label': 'All cities', 'value': 'All'}
+    ],
+    placeholder="Select a region",
+    value ='All'
+ ),  
+    dcc.Slider(
+    min=1,
+    max=12,
+    marks={i: 'Month {}'.format(i) for i in range(13)},
+    value=12,
+ ),
+
+    dcc.Graph(
+        id='7 week inzidenz',
+        figure=fig
+    )
+    
+])
+
+if __name__ == '__main__':
+    app.run_server()
+
+
+
