@@ -51,7 +51,7 @@ fig.update_yaxes(type="log", title_text='Cases Last Week')
 
 
 
-fig.update_layout(title='7 day incidenz', title_x=0.5, template="simple_white")
+fig.update_layout(title='7 day incidenz', title_x=0.5, template="plotly_white")
 
 tumlogo = Path(__file__).parent.parent / 'assets/tumlogo.png'
 logo_base64 = base64.b64encode(open(tumlogo, 'rb').read()).decode('ascii')
@@ -67,7 +67,7 @@ fig2.add_trace(go.Bar(x=df_vac1_repartion['Bundesland'], y=df_vac1_repartion['Me
 fig2.add_trace(go.Bar(x=df_vac1_repartion['Bundesland'],
                       y=df_vac1_repartion['Pflegeheim-bewohnerIn*'], name='Nursing home residents'))
 fig2.update_layout(title="Vaccine repartition due to factors",
-                   title_x=0.5, template="simple_white")
+                   title_x=0.5, template="plotly_white")
 
 
 
@@ -77,20 +77,20 @@ fig3.add_trace(go.Scatter(x=df_daily['Datum'],y=df_daily['Zweitimpfung'],name = 
 fig3.add_trace(go.Scatter(x=df_daily['Datum'],y=df_daily['Gesamtzahl verabreichter Impfstoffdosen'],name = 'Total number of daily vaccine doses' ) )
 
 fig3.update_layout(title="Daily vaccination ",
-                   title_x=0.5, template="simple_white")
+                   title_x=0.5, template="plotly_white")
 
 app.layout = html.Div([
     html.Img(src='data:image/png;base64,{}'.format(logo_base64),
              style={'height': '10%', 'width': '10%', 'display': 'e'}),
     html.Center(html.H1(children='Covid Interactive dashboard',
-                        style={'color': '#7FDBFF'})),
+                        style={'color': '#0065bd'})),
 
-    dcc.Markdown('''
+    html.Center(dcc.Markdown('''
         This dashboard gives an overview about the current covid situation in **germany** as well as the **progress** and **details** about the **vaccination**.
-    ''', style={'fontSize': 16}),
+    ''', style={'fontSize': 16,'color': '#000000'})),
     html.Div([
         html.Br(),
-        dcc.Markdown("Please Select **cities** for the visualization of **the 7 day incidence** :"),
+        dcc.Markdown("Please Select **cities** for the visualization of **the 7 day incidence** :",style={'color': '#000000'}),
         dcc.Dropdown(
             options=[
                 {'label': 'Bayern', 'value': 'BY'},
@@ -121,7 +121,7 @@ app.layout = html.Div([
         html.Br(),
         html.Br(),
         html.Br(),
-        dcc.Markdown(" Select the **factors**  to see **vaccine's** progress based on the fields in **german cities** :"),
+        dcc.Markdown(" Select the **factors**  to see **vaccine's** progress based on the fields in **german cities** :",style={'color': '#000000'}),
         dcc.Dropdown(
             options=[
                 {'label': 'Age', 'value': 'AGE'},
@@ -142,17 +142,26 @@ app.layout = html.Div([
 
 
     ),
+    html.Br(),
+    html.Br(),
+    html.Br(),
     html.Div([
+        dcc.Markdown("The graph below shows the daily vaccines given and their classification if they are given as first dosage or second as well as the total given vaccine",style={'color': '#000000'}),
         dcc.Graph(
             figure=fig3
             )
         ],
         style={'width': '50%', 'display': 'inline-block', 'float': 'left'},
-        )
+        ),
+    html.Div([],
+    
+    style={'width': '50%', 'display': 'inline-block', 'float': 'right'},
+    )
+
     
 
 
-]             
+]            
 )
 
 
