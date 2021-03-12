@@ -20,8 +20,10 @@ df_vac1_repartion = pd.read_csv(
 df_vac2_repartion = pd.read_csv(
     Path(__file__).parent.parent / 'dataset/second dosage.csv')
 
+df_daily = pd.read_csv(
+    Path(__file__).parent.parent / 'dataset/Dailyvac.csv')
 
-# print(df_vac2_repartion)
+
 BY = pd.read_csv(
     "https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-BY.tsv", sep="\t")
 BE = pd.read_csv(
@@ -32,7 +34,6 @@ SN = pd.read_csv(
     "https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-SN.tsv", sep="\t")
 TH = pd.read_csv(
     "https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-TH.tsv", sep="\t")
-# print(BY)
 
 # dataframes
 dfs = {'Bayern': BY, 'Berlin': BE, 'Nordrhein-Westfalen': NW,
@@ -68,6 +69,15 @@ fig2.add_trace(go.Bar(x=df_vac1_repartion['Bundesland'],
 fig2.update_layout(title="Vaccine repartition due to factors",
                    title_x=0.5, template="simple_white")
 
+
+
+fig3 = go.Figure()
+fig3.add_trace(go.Scatter(x=df_daily['Datum'],y=df_daily['Erstimpfung'],name = 'Daily First dosage ' ) )
+fig3.add_trace(go.Scatter(x=df_daily['Datum'],y=df_daily['Zweitimpfung'],name = 'Daily Second dosage ' ) )
+fig3.add_trace(go.Scatter(x=df_daily['Datum'],y=df_daily['Gesamtzahl verabreichter Impfstoffdosen'],name = 'Total number of daily vaccine doses' ) )
+
+fig3.update_layout(title="Daily vaccination ",
+                   title_x=0.5, template="simple_white")
 
 app.layout = html.Div([
     html.Img(src='data:image/png;base64,{}'.format(logo_base64),
@@ -112,7 +122,7 @@ app.layout = html.Div([
         html.Br(),
         html.Br(),
         dcc.Markdown(" Select the **factors**  to see **vaccine's** progress based on the fields in **german cities** :"),
-        html.Center(dcc.RadioItems(
+        dcc.Dropdown(
             options=[
                 {'label': 'Age', 'value': 'AGE'},
                 {'label': 'Job', 'value': 'JOB'},
@@ -120,9 +130,9 @@ app.layout = html.Div([
                 {'label': 'Nursing house residents', 'value': 'NHR'}
             ],
             value=['AGE','JOB','MED','NHR'],
-            labelStyle={'display': 'inline-block'}
+            multi = True
             
-        )),
+        ),
         dcc.Graph(
             id='graph2',
             figure=fig2
@@ -131,7 +141,15 @@ app.layout = html.Div([
         style={'width': '40%', 'display': 'inline-block', 'float': 'right'},
 
 
-    )
+    ),
+    html.Div([
+        dcc.Graph(
+            figure=fig3
+            )
+        ],
+        style={'width': '50%', 'display': 'inline-block', 'float': 'left'},
+        )
+    
 
 
 ]             
@@ -140,3 +158,4 @@ app.layout = html.Div([
 
 if __name__ == '__main__':
     app.run_server()
+
