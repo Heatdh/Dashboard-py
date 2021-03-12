@@ -20,6 +20,7 @@ df_vac1_repartion = pd.read_csv(
 df_vac2_repartion = pd.read_csv(
     Path(__file__).parent.parent / 'dataset/second dosage.csv')
 
+
 # print(df_vac2_repartion)
 BY = pd.read_csv(
     "https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-BY.tsv", sep="\t")
