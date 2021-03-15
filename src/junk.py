@@ -1,4 +1,4 @@
-'''ymax=max(max(BY["Cases_Last_Week"]),max(BE["Cases_Last_Week"]), max(NW["Cases_Last_Week"]), max(SN["Cases_Last_Week"]), max(TH["Cases_Last_Week"]) )
+ymax=max(max(BY["Cases_Last_Week"]),max(BE["Cases_Last_Week"]), max(NW["Cases_Last_Week"]), max(SN["Cases_Last_Week"]), max(TH["Cases_Last_Week"]) )
 state=""
 max_by= max(BY["Cases_Last_Week"])
 max_be=max(BE["Cases_Last_Week"])
@@ -25,11 +25,11 @@ if max_sn==ymax :
 if max_th==ymax :
     state='TH'
     s = TH["Cases_Last_Week"].idxmax()
-    xmax=TH.iloc[s,1]'''
+    xmax=TH.iloc[s,1]
 
 
-'''fig.add_annotation(x=xmax, y=ymax,
+fig.add_annotation(x=xmax, y=ymax,
             text='Maximum n={} in {} \n @{}'.format(ymax, state, xmax),
             showarrow=True,
             arrowhead=1,
-            yshift=ymax+10)'''
+            yshift=ymax+10)
