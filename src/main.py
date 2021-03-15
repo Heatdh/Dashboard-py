@@ -95,10 +95,18 @@ for i in dfs:
 fig.update_xaxes(title_text='Date')
 fig.update_yaxes(type="log", title_text='Cases Last Week')
 
+date_buttons = [{'count': 12, 'step': "month", 'stepmode': "todate", 'label': "1 Year"},
+                {'count': 6, 'step': "month", 'stepmode': "todate", 'label': "6 Months"},
+                {'count': 14, 'step': "day", 'stepmode': "todate", 'label': "2 Weeks"}
+            
+]
+fig.update_layout(    {'xaxis':      {'rangeselector':        {'buttons': date_buttons}    }})
+
 
 
 fig.update_layout(title='7 day incidenz', title_x=0.5, template="plotly_white")
 fig.update_layout({'annotations':[max_annotation]})
+
 # preparing the display of the tum logo to be used inside the html.DiV
 tumlogo = Path(__file__).parent.parent / 'assets/tumlogo.png'
 logo_base64 = base64.b64encode(open(tumlogo, 'rb').read()).decode('ascii')
