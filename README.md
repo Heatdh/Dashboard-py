@@ -34,5 +34,5 @@ python main.py
 open the provided address on your browser
 
 ## License and copyright 
-Technical universtiy 
+© Technical Universtiy Of Munich -- Python for Engineering Data Analysis - from Machine Learning to Visualization
 
