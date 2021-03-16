@@ -34,97 +34,67 @@ TH = pd.read_csv(
 BY.to_csv('check.csv')
 
 # dataframes dictionary necessary for the legends
-dfs = {'Bayern': BY, 'Berlin': BE, 'Nordrhein-Westfalen': NW,
+dfs = {'Bayern': BY, 'Berlin': BE, 'Nordhein-Westfalen': NW,
        'Sachsen': SN, 'Thüringen': TH}
-
+print(NW.shape,BY.shape,SN.shape)
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # calculations for some annotations
-ymax = max(max(BY["Cases_Last_Week"]), max(BE["Cases_Last_Week"]), max(
-    NW["Cases_Last_Week"]), max(SN["Cases_Last_Week"]), max(TH["Cases_Last_Week"]))
-state = ""
-max_by = max(BY["Cases_Last_Week"])
-max_be = max(BE["Cases_Last_Week"])
-max_nw = max(NW["Cases_Last_Week"])
-max_sn = max(SN["Cases_Last_Week"])
-max_th = max(TH["Cases_Last_Week"])
-xmax = 0
-if max_by == ymax:
-    state = 'BY'
-    s = BY["Cases_Last_Week"].idxmax()
-    xmax = BY.iloc[s, 1]
-if max_be == ymax:
-    state = 'BE'
-    s = BE["Cases_Last_Week"].idxmax()
-    xmax = BE.iloc[s, 1]
-if max_nw == ymax:
-    state = 'NW'
-    s = NW["Cases_Last_Week"].idxmax()
-    xmax = NW.iloc[s, 1]
-if max_sn == ymax:
-    state = 'SN'
-    s = SN["Cases_Last_Week"].idxmax()
-    xmax = SN.iloc[s, 1]
-if max_th == ymax:
-    state = 'TH'
-    s = TH["Cases_Last_Week"].idxmax()
-    xmax = TH.iloc[s, 1]
+def global_max_annotation():
+    ymax = max(max(BY["Cases_Last_Week"]), max(BE["Cases_Last_Week"]), max(
+        NW["Cases_Last_Week"]), max(SN["Cases_Last_Week"]), max(TH["Cases_Last_Week"]))
+    state = ""
+    max_by = max(BY["Cases_Last_Week"])
+    max_be = max(BE["Cases_Last_Week"])
+    max_nw = max(NW["Cases_Last_Week"])
+    max_sn = max(SN["Cases_Last_Week"])
+    max_th = max(TH["Cases_Last_Week"])
+    xmax = 0
+    if max_by == ymax:
+        state = 'BY'
+        s = BY["Cases_Last_Week"].idxmax()
+        xmax = BY.iloc[s, 1]
+    if max_be == ymax:
+        state = 'BE'
+        s = BE["Cases_Last_Week"].idxmax()
+        xmax = BE.iloc[s, 1]
+    if max_nw == ymax:
+        state = 'NW'
+        s = NW["Cases_Last_Week"].idxmax()
+        xmax = NW.iloc[s, 1]
+    if max_sn == ymax:
+        state = 'SN'
+        s = SN["Cases_Last_Week"].idxmax()
+        xmax = SN.iloc[s, 1]
+    if max_th == ymax:
+        state = 'TH'
+        s = TH["Cases_Last_Week"].idxmax()
+        xmax = TH.iloc[s, 1]
 
-#axis is logarithmic so we need to perform a log on our ymax for the right positionning
-y_max_log = log10(ymax)
-# preparing annotation to be displayed in fig
-max_annotation = {
-    'x': xmax, 'y': y_max_log,
-    'showarrow': True, 'arrowhead': 3,
-    'text': 'Maximum n={} in {} \n @{}'.format(ymax, state, xmax),
-    'font': {'size': 10, 'color': 'black'}
-}
+    #axis is logarithmic so we need to perform a log on our ymax for the right positionning
+    y_max_log = log10(ymax)
+    # preparing annotation to be displayed in fig
+    max_annotation = {
+        'x': xmax, 'y': y_max_log,
+        'showarrow': True, 'arrowhead': 3,
+        'text': 'the overall Maximum n={} in {} \n @{}'.format(ymax, state, xmax),
+        'font': {'size': 10, 'color': 'black'}
+    }
+    return max_annotation
 
-
-# figure of the last week cases
-fig = go.Figure()
-for i in dfs:
-    fig = fig.add_trace(go.Scatter(x=dfs[i]["Date"],
-                                   y=dfs[i]["Cases_Last_Week"],
-                                   name=i))
-
-fig.update_xaxes(title_text='Date')
-fig.update_yaxes(type="log", title_text='Cases Last Week')
-
-date_buttons = [
-                { 'step': "all", 'stepmode': "todate", 'label': "All"},
-                {'count': 12, 'step': "month", 'stepmode': "todate", 'label': "1 Year"},
-                {'count': 6, 'step': "month",'stepmode': "todate", 'label': "6 Months"},
-                {'count': 14, 'step': "day", 'stepmode': "todate", 'label': "2 Weeks"}
-
-                ]
-fig.update_layout(
-    {'xaxis':      {'rangeselector':        
-                                    {'buttons': date_buttons}}})
-
-#add buttons
-fig.update_layout(title='7 day incidenz', title_x=0.5, template="plotly_white")
-fig.update_layout({'annotations': [max_annotation]})
 
 # preparing the display of the tum logo to be used inside the html.DiV
 tumlogo = Path(__file__).parent.parent / 'assets/tumlogo.png'
 logo_base64 = base64.b64encode(open(tumlogo, 'rb').read()).decode('ascii')
 
 # creating second figure
-fig2 = go.Figure()
-fig2.add_trace(go.Bar(x=df_vac1_repartion['Bundesland'], y=df_vac1_repartion['Indikation nach Alter*'],
-                      name='indication per age'))
-fig2.add_trace(go.Bar(x=df_vac1_repartion['Bundesland'], y=df_vac1_repartion['Berufliche Indikation*'],
-                      name='indication per job'))
-fig2.add_trace(go.Bar(x=df_vac1_repartion['Bundesland'], y=df_vac1_repartion['Medizinische Indikation*'],
-                      name='Medical staff'))
-fig2.add_trace(go.Bar(x=df_vac1_repartion['Bundesland'],
-                      y=df_vac1_repartion['Pflegeheim-bewohnerIn*'], name='Nursing home residents'))
-fig2.update_layout(title="Vaccine repartition due to factors",
-                   title_x=0.5, template="plotly_white")
+# it will be inside the callback 
+# Dropdown fig dict to generate 2nd figure
+factors_dict = {'Indication per age':'Indikation nach Alter*','Indication per job':'Berufliche Indikation*','Medical Indication':'Medizinische Indikation*',
+                'Nursing home residents':'Pflegeheim-bewohnerIn*'}
 
-
+# using pure plotly advance interactivity options for the 3rd figure
 fig3 = go.Figure()
 # markers + lines to show that at the begining that the total is the same as first dosage
 fig3.add_trace(go.Scatter(
@@ -143,7 +113,7 @@ showoptions = [{'label': "Line", 'method': "update", 'args': [{"type": "scatter"
 # updating axes range for better visibility while zooming
 fig3.update_yaxes(range=[0,df_daily['Gesamtzahl verabreichter Impfstoffdosen'].max()+10000])
 fig_int = go.Figure()
-# preparing datas for slider using an intermidiate fig
+# preparing datas for slider using an intermidiate
 for stage in ['Erstimpfung', 'Zweitimpfung', 'Gesamtzahl verabreichter Impfstoffdosen']:
     fig_int.add_trace(go.Bar(x=df_daily['Datum'], y=df_daily[stage], name=stage))
 # creating in plot slider
@@ -184,20 +154,20 @@ for i in second_numpy:
 fig4 = go.Figure()
 fig4.add_trace(go.Pie(labels=['First dosage', 'Second dosage'], values=[
                sum_first, sum_second]))
-fig4.update_layout(title='Given as First vs Second dosage', title_x=0.5, template="plotly_white")
+fig4.update_layout(title='Tota given as First vs Second dosage', title_x=0.5, template="plotly_white")
 
-print(BY.iloc[1, 1])
 # Preparing the slider dates
 BY['Date'] = pd.to_datetime(BY['Date'], errors='coerce')
 
 crop_30 = []
 
+fig0=go.Figure()
 for i in range(0, len(BY['Date']), 30):
     crop_30.append(BY.iloc[i, 1])
 
-print(crop_30)
+#print(crop_30)
 date = [x for x in range(len(BY['Date'].unique()))]
-print(date)
+#print(date)
 dates_30 = []
 for i in range(0, len(date), 30):
     dates_30.append(date[i])
@@ -217,15 +187,16 @@ app.layout = html.Div([
         dcc.Markdown("Please Select **cities** for the visualization of **the 7 day incidence** :",
                      style={'color': '#000000'}),
         dcc.Dropdown(
+            id ='city_selected',
             options=[
-                {'label': 'Bayern', 'value': 'BY'},
-                {'label': 'Berlin', 'value': 'BE'},
-                {'label': 'Nordhein-Westfalen', 'value': 'NW'},
-                {'label': 'Sachsen', 'value': 'SE'},
-                {'label': 'Thüringen', 'value': 'TH'}
+                {'label': 'Bayern', 'value': 'Bayern'},
+                {'label': 'Berlin', 'value': 'Berlin'},
+                {'label': 'Nordhein-Westfalen', 'value': 'Nordhein-Westfalen'},
+                {'label': 'Sachsen', 'value': 'Sachsen'},
+                {'label': 'Thüringen', 'value': 'Thüringen'}
             ],
             placeholder="Select a region",
-            value=['BY', 'BE', 'NW', 'SE', 'TH'],
+            value=['Bayern', 'Berlin', 'Nordhein-Westfalen', 'Sachsen', 'Thüringen'],
             multi=True
         ),
         dcc.Slider(
@@ -238,8 +209,8 @@ app.layout = html.Div([
 
         ),
         dcc.Graph(
-            id='7_week_inzidenz',
-            figure=fig
+            id='7_week_inzidenz'
+            
         )
     ], style={'width': '55%', 'display': 'inline-block'}),
 
@@ -248,22 +219,22 @@ app.layout = html.Div([
         html.Br(),
         html.Br(),
         html.Br(),
-        dcc.Markdown(" Select the **factors**  to see **vaccine's** progress based on the fields in **german cities** :",
+        dcc.Markdown(" Select the **factors**  to see their effect and importance in the **vaccine's** progress  in **german cities** :",
                      style={'color': '#000000'}),
         dcc.Dropdown(
+            id = 'drop_fac',
             options=[
-                {'label': 'Age', 'value': 'AGE'},
-                {'label': 'Job', 'value': 'JOB'},
-                {'label': 'Medical Staff', 'value': 'MED'},
-                {'label': 'Nursing house residents', 'value': 'NHR'}
+                {'label': 'Age', 'value': 'Indication per age'},
+                {'label': 'Job', 'value': 'Indication per job'},
+                {'label': 'Medical Staff', 'value': 'Medical Indication'},
+                {'label': 'Nursing house residents', 'value': 'Nursing home residents'}
             ],
-            value=['AGE', 'JOB', 'MED', 'NHR'],
+            value=['Indication per age', 'Indication per job', 'Medical Indication', 'Nursing home residents'],
             multi=True
 
         ),
         dcc.Graph(
-            id='graph2',
-            figure=fig2
+            id='factors',
         )
     ],
         style={'width': '40%', 'display': 'inline-block', 'float': 'right'},
@@ -280,7 +251,7 @@ app.layout = html.Div([
             figure=fig3
         )
     ],
-        style={'width': '80%', 'display': 'inline-block', 'float': 'left'},
+        style={'width': '70%', 'display': 'inline-block', 'float': 'left'},
     ),
     html.Br(),
     html.Br(),
@@ -290,7 +261,7 @@ app.layout = html.Div([
         )
     ],
 
-        style={'width': '20%', 'display': 'inline-block', 'float': 'right'},
+        style={'width': '30%', 'display': 'inline-block', 'float': 'right'},
     )
 
 
@@ -298,6 +269,68 @@ app.layout = html.Div([
 
 ]
 )
+
+#print (dfs.keys())
+
+@app.callback(
+    Output('7_week_inzidenz', 'figure'),
+    Input('city_selected', 'value'))
+def update_figure(selected_city):
+    fig = go.Figure()
+    for i in selected_city:
+        fig = fig.add_trace(go.Scatter(x=dfs[i]["Date"],
+                                    y=dfs[i]["Cases_Last_Week"],
+                                    name=i))
+        # Display the maximum of the new selection and global once there are 5 states
+        y_inter = max(dfs[i]["Cases_Last_Week"])
+        state = i
+        s = dfs[i]["Cases_Last_Week"].idxmax()
+        xmax_loc = dfs[i].iloc[s, 1]
+        ymax_loc = log10(y_inter)
+        max_loc_anno = {
+        'x': xmax_loc, 'y': ymax_loc,
+        'showarrow': True, 'arrowhead': 3,
+        'text': 'the Maximum in {} n={}  \n @{}'.format(state,ymax_loc, xmax_loc),
+        'font': {'size': 10, 'color': 'black'}
+                    }
+        fig.update_layout({'annotations': [max_loc_anno]})
+            
+    fig.update_xaxes(title_text='Date')
+    fig.update_yaxes(type="log", title_text='Cases Last Week')
+
+    date_buttons = [
+                    { 'step': "all", 'stepmode': "todate", 'label': "All"},
+                    {'count': 12, 'step': "month", 'stepmode': "todate", 'label': "1 Year"},
+                    {'count': 6, 'step': "month",'stepmode': "todate", 'label': "6 Months"},
+                    {'count': 3, 'step': "month", 'stepmode': "backward", 'label': "3 Months"}
+
+                    ]
+    fig.update_layout(
+        {'xaxis':      {'rangeselector':        
+                                        {'buttons': date_buttons}}})
+
+    #add buttons
+    fig.update_layout(title='7 day incidence', title_x=0.5, template="plotly_white")
+    #global max
+    if len(selected_city)==5:
+        fig.update_layout({'annotations': [global_max_annotation()]})
+    
+    
+
+    return fig
+@app.callback(
+    Output('factors', 'figure'),
+    Input('drop_fac', 'value'))
+def update_2figure(factors):
+    fig2 = go.Figure ()
+    for i in factors : 
+        fig2 = fig2.add_trace(
+            go.Bar(x=df_vac1_repartion['Bundesland'], y=df_vac1_repartion[factors_dict[i]],name =i ))
+    fig2.update_layout(title="Vaccine repartition due to factors",
+                title_x=0.5, template="plotly_white")
+        
+    return fig2
+        
 
 
 if __name__ == '__main__':
