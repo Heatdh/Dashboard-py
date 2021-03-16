@@ -134,34 +134,18 @@ fig3.add_trace(go.Scatter(
 fig3.add_trace(go.Scatter(
     x=df_daily['Datum'], y=df_daily['Gesamtzahl verabreichter Impfstoffdosen'], name='Total number of daily vaccine doses'))
 
-# for more visiblity we add some visualization buttons
-date_butt3 = [
-                { 'step': "all", 'stepmode': "todate", 'label': "all"},
-                {'count': 20, 'step': "day",'stepmode': "todate", 'label': "1Day"},
-
-                ]
-fig3.update_layout(
-    {'xaxis':      {'rangeselector':        
-                                    {'buttons': date_butt3}}})
 # have 3 different type of figures 
 showoptions = [{'label': "Line", 'method': "update", 'args': [{"type": "scatter", 'mode': 'lines'}]},
 {'label': "Scatter", 'method': "update", 'args': [{"type": "scatter", 'mode': 'markers'}]},
 {'label': "Bar", 'method': "update", 'args': [{"type": "bar"}]}]
 
-# adding buttons for different type of display
-"""fig3.update_layout(title="Daily vaccination ",
-                   title_x=0.5, template="plotly_white",updatemenus= [{
-                                    'type': "buttons",'direction': 'down',
-                                    'x': 1.5,'y': 0.5,
-                                    'showactive': True,'active': 0,
-                                    'buttons': showoptions}])"""
 
 # updating axes range for better visibility while zooming
 fig3.update_yaxes(range=[0,df_daily['Gesamtzahl verabreichter Impfstoffdosen'].max()+10000])
-
-# preparing datas for slider
+fig_int = go.Figure()
+# preparing datas for slider using an intermidiate fig
 for stage in ['Erstimpfung', 'Zweitimpfung', 'Gesamtzahl verabreichter Impfstoffdosen']:
-    fig.add_trace(go.Bar(x=df_daily['Datum'], y=df_daily[stage], name=stage))
+    fig_int.add_trace(go.Bar(x=df_daily['Datum'], y=df_daily[stage], name=stage))
 # creating in plot slider
 Slider = [
 {'steps':[
@@ -180,6 +164,8 @@ fig3.update_layout(title="Daily vaccination ",
                                     'x': 1.5,'y': 0.5,
                                     'showactive': True,'active': 0,
                                     'buttons': showoptions}])
+
+#moving the slider a little bit down
 fig3['layout']['sliders'][0]['pad']=dict(r= 10, t= 100,)
 
 # conversion to numpy to calculate the sum
