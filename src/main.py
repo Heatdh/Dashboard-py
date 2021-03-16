@@ -149,16 +149,38 @@ showoptions = [{'label': "Line", 'method': "update", 'args': [{"type": "scatter"
 {'label': "Bar", 'method': "update", 'args': [{"type": "bar"}]}]
 
 # adding buttons for different type of display
+"""fig3.update_layout(title="Daily vaccination ",
+                   title_x=0.5, template="plotly_white",updatemenus= [{
+                                    'type': "buttons",'direction': 'down',
+                                    'x': 1.5,'y': 0.5,
+                                    'showactive': True,'active': 0,
+                                    'buttons': showoptions}])"""
+
+# updating axes range for better visibility while zooming
+fig3.update_yaxes(range=[0,df_daily['Gesamtzahl verabreichter Impfstoffdosen'].max()+10000])
+
+# preparing datas for slider
+for stage in ['Erstimpfung', 'Zweitimpfung', 'Gesamtzahl verabreichter Impfstoffdosen']:
+    fig.add_trace(go.Bar(x=df_daily['Datum'], y=df_daily[stage], name=stage))
+# creating in plot slider
+Slider = [
+{'steps':[
+    {'method': 'update', 'label': 'daily given as First dosage', 'args': [{'visible': [True, False, False]}]},
+    {'method': 'update', 'label': 'daily given as second dosage', 'args': [{'visible': [False, True, False]}]},
+    {'method': 'update', 'label': 'daily total given dosage', 'args': [{'visible': [False, False, True]}]},
+    {'method': 'update', 'label': 'All ', 'args': [{'visible': [True, True, True]}]},
+    {'method': 'update', 'label': 'First vs Second ', 'args': [{'visible': [True, True, False]}]}]},
+]
+
+fig3.update_layout({'sliders': Slider})
+
 fig3.update_layout(title="Daily vaccination ",
                    title_x=0.5, template="plotly_white",updatemenus= [{
                                     'type': "buttons",'direction': 'down',
                                     'x': 1.5,'y': 0.5,
                                     'showactive': True,'active': 0,
                                     'buttons': showoptions}])
-
-# updating axes range for better visibility while zooming
-fig3.update_yaxes(range=[0,df_daily['Gesamtzahl verabreichter Impfstoffdosen'].max()+10000])
-
+fig3['layout']['sliders'][0]['pad']=dict(r= 10, t= 100,)
 
 # conversion to numpy to calculate the sum
 first_numpy = df_daily['Erstimpfung'].values
@@ -176,6 +198,7 @@ for i in second_numpy:
 fig4 = go.Figure()
 fig4.add_trace(go.Pie(labels=['First dosage', 'Second dosage'], values=[
                sum_first, sum_second]))
+fig4.update_layout(title='Given as First vs Second dosage', title_x=0.5, template="plotly_white")
 
 print(BY.iloc[1, 1])
 # Preparing the slider dates
@@ -271,15 +294,17 @@ app.layout = html.Div([
             figure=fig3
         )
     ],
-        style={'width': '50%', 'display': 'inline-block', 'float': 'left'},
+        style={'width': '80%', 'display': 'inline-block', 'float': 'left'},
     ),
+    html.Br(),
+    html.Br(),
     html.Div([
         dcc.Graph(
             figure=fig4
         )
     ],
 
-        style={'width': '50%', 'display': 'inline-block', 'float': 'right'},
+        style={'width': '20%', 'display': 'inline-block', 'float': 'right'},
     )
 
 
