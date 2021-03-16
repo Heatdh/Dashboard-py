@@ -40,52 +40,49 @@ dfs = {'Bayern': BY, 'Berlin': BE, 'Nordrhein-Westfalen': NW,
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-#calculations for some annotations
-ymax=max(max(BY["Cases_Last_Week"]),max(BE["Cases_Last_Week"]), max(NW["Cases_Last_Week"]), max(SN["Cases_Last_Week"]), max(TH["Cases_Last_Week"]) )
-state=""
-max_by= max(BY["Cases_Last_Week"])
-max_be=max(BE["Cases_Last_Week"])
-max_nw=max(NW["Cases_Last_Week"])
-max_sn=max(SN["Cases_Last_Week"])
-max_th=max(TH["Cases_Last_Week"])
-xmax=0
-if max_by==ymax :
-    state='BY'
+# calculations for some annotations
+ymax = max(max(BY["Cases_Last_Week"]), max(BE["Cases_Last_Week"]), max(
+    NW["Cases_Last_Week"]), max(SN["Cases_Last_Week"]), max(TH["Cases_Last_Week"]))
+state = ""
+max_by = max(BY["Cases_Last_Week"])
+max_be = max(BE["Cases_Last_Week"])
+max_nw = max(NW["Cases_Last_Week"])
+max_sn = max(SN["Cases_Last_Week"])
+max_th = max(TH["Cases_Last_Week"])
+xmax = 0
+if max_by == ymax:
+    state = 'BY'
     s = BY["Cases_Last_Week"].idxmax()
-    xmax=BY.iloc[s,1]
-if max_be==ymax :
-    state='BE'
+    xmax = BY.iloc[s, 1]
+if max_be == ymax:
+    state = 'BE'
     s = BE["Cases_Last_Week"].idxmax()
-    xmax=BE.iloc[s,1]
-if max_nw==ymax :
-    state='NW'
+    xmax = BE.iloc[s, 1]
+if max_nw == ymax:
+    state = 'NW'
     s = NW["Cases_Last_Week"].idxmax()
-    xmax=NW.iloc[s,1]
-if max_sn==ymax :
-    state='SN'
+    xmax = NW.iloc[s, 1]
+if max_sn == ymax:
+    state = 'SN'
     s = SN["Cases_Last_Week"].idxmax()
-    xmax=SN.iloc[s,1]
-if max_th==ymax :
-    state='TH'
+    xmax = SN.iloc[s, 1]
+if max_th == ymax:
+    state = 'TH'
     s = TH["Cases_Last_Week"].idxmax()
-    xmax=TH.iloc[s,1]
+    xmax = TH.iloc[s, 1]
 
-#axis is logarithmic
+#axis is logarithmic so we need to perform a log on our ymax for the right positionning
 y_max_log = log10(ymax)
-
+# preparing annotation to be displayed in fig
 max_annotation = {
-    'x':xmax,'y':y_max_log,
-    'showarrow':True,'arrowhead':3,
-    'text':'Maximum n={} in {} \n @{}'.format(ymax, state, xmax),
-    'font':{'size':10,'color':'black'}
-    }
-
-    
+    'x': xmax, 'y': y_max_log,
+    'showarrow': True, 'arrowhead': 3,
+    'text': 'Maximum n={} in {} \n @{}'.format(ymax, state, xmax),
+    'font': {'size': 10, 'color': 'black'}
+}
 
 
-
-
-#figure of the last week cases 
+# figure of the last week cases
 fig = go.Figure()
 for i in dfs:
     fig = fig.add_trace(go.Scatter(x=dfs[i]["Date"],
@@ -95,17 +92,20 @@ for i in dfs:
 fig.update_xaxes(title_text='Date')
 fig.update_yaxes(type="log", title_text='Cases Last Week')
 
-date_buttons = [{'count': 12, 'step': "month", 'stepmode': "todate", 'label': "1 Year"},
-                {'count': 6, 'step': "month", 'stepmode': "todate", 'label': "6 Months"},
+date_buttons = [
+                { 'step': "all", 'stepmode': "todate", 'label': "All"},
+                {'count': 12, 'step': "month", 'stepmode': "todate", 'label': "1 Year"},
+                {'count': 6, 'step': "month",'stepmode': "todate", 'label': "6 Months"},
                 {'count': 14, 'step': "day", 'stepmode': "todate", 'label': "2 Weeks"}
-            
-]
-fig.update_layout(    {'xaxis':      {'rangeselector':        {'buttons': date_buttons}    }})
 
+                ]
+fig.update_layout(
+    {'xaxis':      {'rangeselector':        
+                                    {'buttons': date_buttons}}})
 
-
+#add buttons
 fig.update_layout(title='7 day incidenz', title_x=0.5, template="plotly_white")
-fig.update_layout({'annotations':[max_annotation]})
+fig.update_layout({'annotations': [max_annotation]})
 
 # preparing the display of the tum logo to be used inside the html.DiV
 tumlogo = Path(__file__).parent.parent / 'assets/tumlogo.png'
@@ -125,45 +125,72 @@ fig2.update_layout(title="Vaccine repartition due to factors",
                    title_x=0.5, template="plotly_white")
 
 
-
 fig3 = go.Figure()
-fig3.add_trace(go.Scatter(x=df_daily['Datum'],y=df_daily['Erstimpfung'],name = 'Daily First dosage ' ) )
-fig3.add_trace(go.Scatter(x=df_daily['Datum'],y=df_daily['Zweitimpfung'],name = 'Daily Second dosage ' ) )
-fig3.add_trace(go.Scatter(x=df_daily['Datum'],y=df_daily['Gesamtzahl verabreichter Impfstoffdosen'],name = 'Total number of daily vaccine doses' ) )
+# markers + lines to show that at the begining that the total is the same as first dosage
+fig3.add_trace(go.Scatter(
+    x=df_daily['Datum'], y=df_daily['Erstimpfung'], name='Daily First dosage ',mode ='markers+lines'))
+fig3.add_trace(go.Scatter(
+    x=df_daily['Datum'], y=df_daily['Zweitimpfung'], name='Daily Second dosage '))
+fig3.add_trace(go.Scatter(
+    x=df_daily['Datum'], y=df_daily['Gesamtzahl verabreichter Impfstoffdosen'], name='Total number of daily vaccine doses'))
 
+# for more visiblity we add some visualization buttons
+date_butt3 = [
+                { 'step': "all", 'stepmode': "todate", 'label': "all"},
+                {'count': 20, 'step': "day",'stepmode': "todate", 'label': "1Day"},
+
+                ]
+fig3.update_layout(
+    {'xaxis':      {'rangeselector':        
+                                    {'buttons': date_butt3}}})
+# have 3 different type of figures 
+showoptions = [{'label': "Line", 'method': "update", 'args': [{"type": "scatter", 'mode': 'lines'}]},
+{'label': "Scatter", 'method': "update", 'args': [{"type": "scatter", 'mode': 'markers'}]},
+{'label': "Bar", 'method': "update", 'args': [{"type": "bar"}]}]
+
+# adding buttons for different type of display
 fig3.update_layout(title="Daily vaccination ",
-                   title_x=0.5, template="plotly_white")
+                   title_x=0.5, template="plotly_white",updatemenus= [{
+                                    'type': "buttons",'direction': 'down',
+                                    'x': 1.5,'y': 0.5,
+                                    'showactive': True,'active': 0,
+                                    'buttons': showoptions}])
+
+# updating axes range for better visibility while zooming
+fig3.update_yaxes(range=[0,df_daily['Gesamtzahl verabreichter Impfstoffdosen'].max()+10000])
+
 
 # conversion to numpy to calculate the sum
 first_numpy = df_daily['Erstimpfung'].values
-second_numpy =  df_daily['Zweitimpfung'].values
+second_numpy = df_daily['Zweitimpfung'].values
 
 # Calculating the sum of first dosage and second dosage to create a pie chart
-sum_first=0
+sum_first = 0
 sum_second = 0
 for i in first_numpy:
-    sum_first=sum_first+i 
+    sum_first = sum_first+i
 for i in second_numpy:
-    sum_second=sum_second+i 
+    sum_second = sum_second+i
 
-# figure 4 as a pie chart 
+# figure 4 as a pie chart
 fig4 = go.Figure()
-fig4.add_trace(go.Pie(labels=['First dosage','Second dosage'],values=[sum_first,sum_second]))
+fig4.add_trace(go.Pie(labels=['First dosage', 'Second dosage'], values=[
+               sum_first, sum_second]))
 
-print(BY.iloc[1,1])
-#Preparing the slider dates
+print(BY.iloc[1, 1])
+# Preparing the slider dates
 BY['Date'] = pd.to_datetime(BY['Date'], errors='coerce')
 
-crop_30=[]
+crop_30 = []
 
-for i in range(0,len(BY['Date']),30):
-    crop_30.append(BY.iloc[i,1])
+for i in range(0, len(BY['Date']), 30):
+    crop_30.append(BY.iloc[i, 1])
 
-print (crop_30)
-date= [x for x in range(len(BY['Date'].unique()))]
+print(crop_30)
+date = [x for x in range(len(BY['Date'].unique()))]
 print(date)
 dates_30 = []
-for i in range(0,len(date),30):
+for i in range(0, len(date), 30):
     dates_30.append(date[i])
 
 # application layout
@@ -175,10 +202,11 @@ app.layout = html.Div([
 
     html.Center(dcc.Markdown('''
         This dashboard gives an overview about the current covid situation in **germany** as well as the **progress** and **details** about the **vaccination**.
-    ''', style={'fontSize': 16,'color': '#000000'})),
+    ''', style={'fontSize': 16, 'color': '#000000'})),
     html.Div([
         html.Br(),
-        dcc.Markdown("Please Select **cities** for the visualization of **the 7 day incidence** :",style={'color': '#000000'}),
+        dcc.Markdown("Please Select **cities** for the visualization of **the 7 day incidence** :",
+                     style={'color': '#000000'}),
         dcc.Dropdown(
             options=[
                 {'label': 'Bayern', 'value': 'BY'},
@@ -194,10 +222,11 @@ app.layout = html.Div([
         dcc.Slider(
             min=dates_30[0],
             max=dates_30[-1],
-            value=BY.iloc[0,1],
-            marks={numd:date.strftime('%d/%m/%y') for numd,date in zip(dates_30, crop_30)},
+            value=BY.iloc[0, 1],
+            marks={numd: date.strftime('%d/%m/%y')
+                   for numd, date in zip(dates_30, crop_30)},
             step=80
-            
+
         ),
         dcc.Graph(
             id='7_week_inzidenz',
@@ -206,11 +235,12 @@ app.layout = html.Div([
     ], style={'width': '55%', 'display': 'inline-block'}),
 
     html.Div([
-        
+
         html.Br(),
         html.Br(),
         html.Br(),
-        dcc.Markdown(" Select the **factors**  to see **vaccine's** progress based on the fields in **german cities** :",style={'color': '#000000'}),
+        dcc.Markdown(" Select the **factors**  to see **vaccine's** progress based on the fields in **german cities** :",
+                     style={'color': '#000000'}),
         dcc.Dropdown(
             options=[
                 {'label': 'Age', 'value': 'AGE'},
@@ -218,9 +248,9 @@ app.layout = html.Div([
                 {'label': 'Medical Staff', 'value': 'MED'},
                 {'label': 'Nursing house residents', 'value': 'NHR'}
             ],
-            value=['AGE','JOB','MED','NHR'],
-            multi = True
-            
+            value=['AGE', 'JOB', 'MED', 'NHR'],
+            multi=True
+
         ),
         dcc.Graph(
             id='graph2',
@@ -235,29 +265,29 @@ app.layout = html.Div([
     html.Br(),
     html.Br(),
     html.Div([
-        dcc.Markdown("The graph below shows the daily vaccines given and their classification if they are given as first dosage or second as well as the total given vaccine",style={'color': '#000000'}),
+        dcc.Markdown("The graph below shows the daily vaccines given and their classification if they are given as first dosage or second as well as the total given vaccine", style={
+                     'color': '#000000'}),
         dcc.Graph(
             figure=fig3
-            )
-        ],
+        )
+    ],
         style={'width': '50%', 'display': 'inline-block', 'float': 'left'},
-        ),
+    ),
     html.Div([
         dcc.Graph(
             figure=fig4
-            )
-        ],
-    
-    style={'width': '50%', 'display': 'inline-block', 'float': 'right'},
+        )
+    ],
+
+        style={'width': '50%', 'display': 'inline-block', 'float': 'right'},
     )
 
-    
 
 
-]            
+
+]
 )
 
 
 if __name__ == '__main__':
     app.run_server()
-
