@@ -25,8 +25,7 @@ df_vac2_repartion = pd.read_csv(
 df_daily = pd.read_csv(
     Path(__file__).parent.parent / 'dataset/Dailyvac.csv')
 
-BY = pd.read_csv(
-    "https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-BY.tsv", sep="\t")
+BY = pd.read_csv("https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-BY.tsv", sep="\t")
 BE = pd.read_csv(
     "https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-BE.tsv", sep="\t")
 NW = pd.read_csv(
@@ -40,7 +39,7 @@ BY.to_csv('check.csv')
 # dataframes dictionary necessary for the legends
 dfs = {'Bayern': BY, 'Berlin': BE, 'Nordhein-Westfalen': NW,
        'Sachsen': SN, 'Thüringen': TH}
-print(NW.shape, BY.shape, SN.shape)
+#print(NW.shape, BY.shape, SN.shape)
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
@@ -104,11 +103,11 @@ factors_dict = {'Indication per age': 'Indikation nach Alter*', 'Indication per 
 fig3 = go.Figure()
 # markers + lines to show that at the begining that the total is the same as first dosage
 fig3.add_trace(go.Scatter(
-    x=df_daily['Datum'], y=df_daily['Erstimpfung'], name='Daily First dosage ', mode='markers+lines'))
+    x=df_daily['Datum'], y=df_daily['Erstimpfung'], name='Given as First dosage ', mode='markers+lines'))
 fig3.add_trace(go.Scatter(
-    x=df_daily['Datum'], y=df_daily['Zweitimpfung'], name='Daily Second dosage '))
+    x=df_daily['Datum'], y=df_daily['Zweitimpfung'], name='Given as Second dosage '))
 fig3.add_trace(go.Scatter(
-    x=df_daily['Datum'], y=df_daily['Gesamtzahl verabreichter Impfstoffdosen'], name='Total number of daily vaccine doses'))
+    x=df_daily['Datum'], y=df_daily['Gesamtzahl verabreichter Impfstoffdosen'], name='Total number of daily doses given'))
 
 # have 3 different type of figures
 showoptions = [{'label': "Line", 'method': "update", 'args': [{"type": "scatter", 'mode': 'lines'}]},
@@ -142,7 +141,7 @@ Slider = [
 fig3.update_layout({'sliders': Slider})
 
 fig3.update_layout(title="Daily vaccination ",
-                   title_x=0.5, template="plotly_white", updatemenus=[{
+                   title_x=0.3,title_y=0.9, template="plotly_white", updatemenus=[{
                        'type': "buttons", 'direction': 'down',
                        'x': 1.5, 'y': 0.5,
                        'showactive': True, 'active': 0,
@@ -173,8 +172,8 @@ def sum_func(numpy_arr):
 fig4 = go.Figure()
 fig4.add_trace(go.Pie(labels=['First dosage', 'Second dosage'], values=[
                sum_func(df_daily['Erstimpfung'].values), sum_func(df_daily['Zweitimpfung'].values)]))
-fig4.update_layout(title='Total given as First vs Second dosage',
-                   title_x=0.5, template="plotly_white")
+fig4.update_layout(title='Vaccines distribution',
+                   title_x=0.5,title_y=0.9, template="plotly_white")
 
 # Preparing the slider dates
 BY['Date'] = pd.to_datetime(BY['Date'], errors='coerce')
@@ -203,6 +202,7 @@ app.layout = html.Div([
     ''', style={'fontSize': 16, 'color': '#000000'})),
     html.Div([
         html.Br(),
+        html.Br(),
         dcc.Markdown("Please Select **cities** for the visualization of **the 7 day incidence** :",
                      style={'color': '#000000'}),
         dcc.Dropdown(
@@ -219,13 +219,12 @@ app.layout = html.Div([
                    'Sachsen', 'Thüringen'],
             multi=True
         ),
-        dcc.Slider(
+        dcc.RangeSlider(
             min=dates_30[0],
             max=dates_30[-1],
-            value=BY.iloc[0, 1],
             marks={numd: date.strftime('%d/%m/%y')
-                   for numd, date in zip(dates_30, crop_30)},
-            step=80
+                    for numd, date in zip(dates_30, crop_30)},
+            step=10
 
         ),
         dcc.Graph(
@@ -233,10 +232,7 @@ app.layout = html.Div([
 
         )
     ], style={'width': '55%', 'display': 'inline-block'}),
-
     html.Div([
-
-        html.Br(),
         html.Br(),
         html.Br(),
         dcc.Markdown(" Select the **factors**  to see their effect and importance in the **vaccine's** progress  in **german cities** :",
@@ -266,23 +262,23 @@ app.layout = html.Div([
     html.Br(),
     html.Br(),
     html.Br(),
+    html.Center(html.Label('Vaccination Progress',style={'fontSize':25,'color':'#0065bd','marginBottom': 10, 'marginTop': 25})),
+        html.Center(dcc.Markdown("The graphs below show the daily vaccines given and their classification if they were given as first dosage or second as well as the total vaccines and its  distribution",
+         style={
+                     'color': '#000000'})),
     html.Div([
-        dcc.Markdown("The graph below shows the daily vaccines given and their classification if they are given as first dosage or second as well as the total given vaccine", style={
-                     'color': '#000000'}),
+        
         dcc.Graph(
             figure=fig3
         )
     ],
         style={'width': '70%', 'display': 'inline-block', 'float': 'left'},
     ),
-    html.Br(),
-    html.Br(),
     html.Div([
         dcc.Graph(
             figure=fig4
         )
     ],
-
         style={'width': '30%', 'display': 'inline-block', 'float': 'right'},
     )
 
@@ -332,16 +328,17 @@ def update_figure(selected_city):
     date_buttons = [
         {'step': "all", 'stepmode': "todate", 'label': "All"},
         {'count': 12, 'step': "month",
-         'stepmode': "todate", 'label': "1 Year"},
+         'stepmode': "todate", 'label': "1Y"},
         {'count': 6, 'step': "month",
-         'stepmode': "todate", 'label': "6 Months"},
+         'stepmode': "todate", 'label': "6M"},
         {'count': 3, 'step': "month",
-         'stepmode': "backward", 'label': "3 Months"}
+         'stepmode': "todate", 'label': "3M"}
 
     ]
     fig.update_layout(
         {'xaxis':      {'rangeselector':
                         {'buttons': date_buttons}}})
+    #print (date_buttons)
 
     # add buttons
     fig.update_layout(title='7 day incidence',
