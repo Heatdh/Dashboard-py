@@ -180,16 +180,20 @@ BY['Date'] = pd.to_datetime(BY['Date'], errors='coerce')
 
 crop_30 = []
 
-for s in range(0, len(BY['Date']), 30):
+for s in range(0, len(BY['Date'])-1, 30):
     crop_30.append(BY.iloc[s, 1])
+crop_30.append(BY.iloc[-1,1])
 
 # print(crop_30)
 date = [x for x in range(len(BY['Date'].unique()))]
 # print(date)
 dates_30 = []
-for n in range(0, len(date), 30):
+for n in range(0, len(date)-1, 30):
     dates_30.append(date[n])
-
+    # include last actual date
+dates_30.append(date[-1])
+print (dates_30)
+print (crop_30)
 # application layout
 app.layout = html.Div([
     html.Img(src='data:image/png;base64,{}'.format(logo_base64),
@@ -222,9 +226,9 @@ app.layout = html.Div([
         dcc.RangeSlider(
             min=dates_30[0],
             max=dates_30[-1],
-            marks={numd: date.strftime('%d/%m/%y')
+            marks={numd: date.strftime('%y-%m-%d')
                     for numd, date in zip(dates_30, crop_30)},
-            step=10
+            step=dates_30[1]-dates_30[0]
 
         ),
         dcc.Graph(
@@ -289,7 +293,7 @@ app.layout = html.Div([
 )
 
 #print (dfs.keys())
-
+print(crop_30[-1])
 
 @app.callback(
     Output('7_week_inzidenz', 'figure'),
