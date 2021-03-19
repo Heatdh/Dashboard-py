@@ -25,6 +25,11 @@ df_vac2_repartion = pd.read_csv(
 df_daily = pd.read_csv(
     Path(__file__).parent.parent / 'dataset/Dailyvac.csv')
 
+df_2comp =pd.read_csv(
+    Path(__file__).parent.parent / 'dataset/secondvacc.csv')
+
+
+
 BY = pd.read_csv("https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-BY.tsv", sep="\t")
 BE = pd.read_csv(
     "https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-BE.tsv", sep="\t")
