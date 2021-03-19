@@ -25,6 +25,7 @@ df_vac2_repartion = pd.read_csv(
 df_daily = pd.read_csv(
     Path(__file__).parent.parent / 'dataset/Dailyvac.csv')
 
+
 df_2comp =pd.read_csv(
     Path(__file__).parent.parent / 'dataset/secondvacc.csv')
 
@@ -289,6 +290,13 @@ app.layout = html.Div([
         )
     ],
         style={'width': '30%', 'display': 'inline-block', 'float': 'right'},
+    ),
+    html.Div([
+        dcc.Graph(
+            figure=fig4
+        )
+    ],
+        style={'width': '50%', 'display': 'inline-block', 'float': 'right'},
     )
 
 
