@@ -41,6 +41,7 @@ import pandas as pd
 data_xls = pd.read_excel(<Path>>, dtype=str, index_col=None)
 data_xls.to_csv('<Path + csv extension >', encoding='utf-8', index=False)
 ```
+#### The data at the beginning of the project were dated as 03/03/2021
 ## License and copyright 
 © Technical Universtiy Of Munich -- Python for Engineering Data Analysis - from Machine Learning to Visualization
 
