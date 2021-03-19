@@ -26,9 +26,14 @@ df_daily = pd.read_csv(
     Path(__file__).parent.parent / 'dataset/Dailyvac.csv')
 
 
-df_2comp =pd.read_csv(
-    Path(__file__).parent.parent / 'dataset/secondvacc.csv')
+df_1comp =pd.read_csv(
+    Path(__file__).parent.parent / 'dataset/firstvaccvacc.csv',index_col=False)
 
+df_2comp =pd.read_csv(
+    Path(__file__).parent.parent / 'dataset/secondvacc.csv',index_col=False)
+
+# will be used for callbacks in order to select which dataframe to use
+df_comp ={'First dosage':df_1comp,'Second dosage':df_2comp}
 
 
 BY = pd.read_csv("https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-BY.tsv", sep="\t")
@@ -198,8 +203,30 @@ for n in range(0, len(date)-1, 30):
     dates_30.append(date[n])
     # include last actual date
 dates_30.append(date[-1])
-print (dates_30)
-print (crop_30)
+#print (dates_30)
+#print (crop_30)
+
+
+def auto_gendict (column):
+    """
+    in order to manage huge amount of options in the dropdown this function auto generations a dictonary from a given column
+    this will be passed after to the option argument in the dcc component
+    Args:
+        column: a column/row of a data frame that contains labeled data
+
+    Returns:
+        [dict]: a dictionany with label and value set to a numerical index
+    """
+    dict_gen=[]
+    j=0
+    for i in column:
+        dict_gen.append({'label': i, 'value': j})
+        j+=1
+    return dict_gen
+    
+print ()
+
+
 # application layout
 app.layout = html.Div([
     html.Img(src='data:image/png;base64,{}'.format(logo_base64),
@@ -291,12 +318,32 @@ app.layout = html.Div([
     ],
         style={'width': '30%', 'display': 'inline-block', 'float': 'right'},
     ),
+     html.Br(),
+    html.Br(),
+    html.Center(html.Label('Leading vaccine manufacturers',style={'fontSize':25,'color':'#0065bd','marginBottom': 10, 'marginTop': 25})),
     html.Div([
+        # too many values in the dropdown => auto generated dictionnay 
+        dcc.Dropdown(
+            id='comp_drop',
+            options=auto_gendict(df_2comp['Bundesland'].unique()),
+            value = [i for i in range(4)],
+            multi=True
+
+        ),
+        dcc.Checklist(
+            id='check_dos',
+            options=[
+                {'label': 'First dosage', 'value': 'First dosage'},
+                {'label': 'Second dosage', 'value': 'Second dosage'}
+            ],
+            value=['First dosage',],
+            labelStyle={'display': 'inline-block'}
+        ),  
         dcc.Graph(
-            figure=fig4
+            id ="vacc_comp"
         )
     ],
-        style={'width': '50%', 'display': 'inline-block', 'float': 'right'},
+        style={'width': '100%', 'display': 'inline-block'},
     )
 
 
@@ -306,7 +353,7 @@ app.layout = html.Div([
 )
 
 #print (dfs.keys())
-print(crop_30[-1])
+#print(crop_30[-1])
 
 @app.callback(
     Output('7_week_inzidenz', 'figure'),
@@ -387,6 +434,24 @@ def update_2figure(factors):
                        title_x=0.5, template="plotly_white")
 
     return fig2
+
+
+@app.callback(
+    Output('vacc_comp', 'figure'),
+    Input('comp_drop', 'value'))
+   # Input('check_dos', 'value'))
+def update_vacfig(state):
+    figcomp = go.Figure()
+    for i in state :
+        figcomp= figcomp.add_trace( go.Bar (x=df_2comp.iloc[[i],0],y=df_2comp.iloc[[i],2],text=df_2comp.iloc[[i],2] ,textposition='auto', name = 'BioNTech'))
+        figcomp= figcomp.add_trace( go.Bar (x=df_2comp.iloc[[i],0],y=df_2comp.iloc[[i],3],text=df_2comp.iloc[[i],3] ,textposition='auto',name = 'Moderna'))
+    figcomp.update_layout(title="Vaccines used depending on the state",
+                       title_x=0.5, template="plotly_white")
+    return figcomp
+
+
+
+
 
 
 if __name__ == '__main__':
