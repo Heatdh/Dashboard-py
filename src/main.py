@@ -9,6 +9,7 @@ import base64
 from pathlib import Path
 from math import log10
 import pandas as pd
+import numpy as np
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -180,12 +181,14 @@ def sum_func(numpy_arr):
 
 
 # figure 4 as a pie chart
-fig4 = go.Figure()
-fig4.add_trace(go.Pie(labels=['First dosage', 'Second dosage'], values=[
+fig_pie = go.Figure()
+fig_pie.add_trace(go.Pie(labels=['First dosage', 'Second dosage'], values=[
                sum_func(df_daily['Erstimpfung'].values), sum_func(df_daily['Zweitimpfung'].values)]))
-fig4.update_layout(title='Vaccines distribution',
+fig_pie.update_layout(title='Vaccines distribution',
                    title_x=0.5,title_y=0.9, template="plotly_white")
-
+colors=[ 'darkorange', 'lightgreen']
+fig_pie.update_traces(hoverinfo='label+percent', textinfo='value', textfont_size=20,
+                  marker=dict(colors=colors, line=dict(color='#000000', width=2)))
 # Preparing the slider dates
 BY['Date'] = pd.to_datetime(BY['Date'], errors='coerce')
 
@@ -313,7 +316,7 @@ app.layout = html.Div([
     ),
     html.Div([
         dcc.Graph(
-            figure=fig4
+            figure=fig_pie
         )
     ],
         style={'width': '30%', 'display': 'inline-block', 'float': 'right'},
@@ -336,7 +339,7 @@ app.layout = html.Div([
                 {'label': 'First dosage', 'value': 'First dosage'},
                 {'label': 'Second dosage', 'value': 'Second dosage'}
             ],
-            value=['First dosage',],
+            value=['First dosage'],
             labelStyle={'display': 'inline-block'}
         ),  
         dcc.Graph(
@@ -435,16 +438,52 @@ def update_2figure(factors):
 
     return fig2
 
+#solved without the need of alternances 
+#red = ["#FF000"+str(i) for i in range (15)]
 
 @app.callback(
     Output('vacc_comp', 'figure'),
-    Input('comp_drop', 'value'))
-   # Input('check_dos', 'value'))
-def update_vacfig(state):
+    Input('comp_drop', 'value'),
+    Input('check_dos', 'value'))
+def update_vacfig(state,dosage):
     figcomp = go.Figure()
+    print(dosage)
+    duplicate_legend_fix = 0
     for i in state :
-        figcomp= figcomp.add_trace( go.Bar (x=df_2comp.iloc[[i],0],y=df_2comp.iloc[[i],2],text=df_2comp.iloc[[i],2] ,textposition='auto', name = 'BioNTech'))
-        figcomp= figcomp.add_trace( go.Bar (x=df_2comp.iloc[[i],0],y=df_2comp.iloc[[i],3],text=df_2comp.iloc[[i],3] ,textposition='auto',name = 'Moderna'))
+        duplicate_legend_fix = duplicate_legend_fix + 1
+        for j in dosage :
+                # avoid legends being duplicated so showlegend true only in first case
+                
+                if duplicate_legend_fix == 1:
+                    figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=df_comp[j].iloc[[i],2],text=df_comp[j].iloc[[i],2] ,
+                                                        marker={'color' :'orange'},textposition='auto', name = 'BioNTech',showlegend=True))
+                    figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=df_comp[j].iloc[[i],3],text=df_comp[j].iloc[[i],3] ,
+                                                        marker={'color' :'green'},textposition='auto',name = 'Moderna',showlegend=True))
+                    #astrazeneca exists only in first given the data till 03/20/2021
+                    if (j== 'First dosage'):
+                        figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=df_comp[j].iloc[[i],4],text=df_comp[j].iloc[[i],4] ,
+                                                            marker={'color' :'yellow'},textposition='auto',name = 'AstraZeneca',showlegend=True))
+                    else :
+                        # Not leaving empty but plotting with 0 
+                        y_0 = np.zeros(len(df_1comp.iloc[:,0].values.shape))
+                        figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=y_0,text='0' ,
+                                                        marker={'color' :'yellow'},textposition='auto',name = 'AstraZeneca',showlegend=True))
+                else : 
+                    figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=df_comp[j].iloc[[i],2],text=df_comp[j].iloc[[i],2] ,
+                                                        marker={'color' :'orange'},textposition='auto', name = 'BioNTech',showlegend=False))
+                    figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=df_comp[j].iloc[[i],3],text=df_comp[j].iloc[[i],3] ,
+                                                        marker={'color' :'green'},textposition='auto',name = 'Moderna',showlegend=False))
+                    #astrazeneca exists only in first given the data till 03/20/2021
+                    if (j== 'First dosage'):
+                        figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=df_comp[j].iloc[[i],4],text=df_comp[j].iloc[[i],4] ,
+                                                            marker={'color' :'yellow'},textposition='auto',name = 'AstraZeneca',showlegend=False))
+                    else :
+                        # Not leaving empty but plotting with 0 
+                        y_0 = np.zeros(len(df_1comp.iloc[:,0].values.shape))
+                        figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=y_0,text='0' ,
+                                                        marker={'color' :'yellow'},textposition='auto',name = 'AstraZeneca',showlegend=False))
+                        
+                
     figcomp.update_layout(title="Vaccines used depending on the state",
                        title_x=0.5, template="plotly_white")
     return figcomp
