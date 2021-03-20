@@ -27,17 +27,18 @@ df_daily = pd.read_csv(
     Path(__file__).parent.parent / 'dataset/Dailyvac.csv')
 
 
-df_1comp =pd.read_csv(
-    Path(__file__).parent.parent / 'dataset/firstvaccvacc.csv',index_col=False)
+df_1comp = pd.read_csv(
+    Path(__file__).parent.parent / 'dataset/firstvaccvacc.csv', index_col=False)
 
-df_2comp =pd.read_csv(
-    Path(__file__).parent.parent / 'dataset/secondvacc.csv',index_col=False)
+df_2comp = pd.read_csv(
+    Path(__file__).parent.parent / 'dataset/secondvacc.csv', index_col=False)
 
 # will be used for callbacks in order to select which dataframe to use
-df_comp ={'First dosage':df_1comp,'Second dosage':df_2comp}
+df_comp = {'First dosage': df_1comp, 'Second dosage': df_2comp}
 
 
-BY = pd.read_csv("https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-BY.tsv", sep="\t")
+BY = pd.read_csv(
+    "https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-BY.tsv", sep="\t")
 BE = pd.read_csv(
     "https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-BE.tsv", sep="\t")
 NW = pd.read_csv(
@@ -153,7 +154,7 @@ Slider = [
 fig3.update_layout({'sliders': Slider})
 
 fig3.update_layout(title="Daily vaccination ",
-                   title_x=0.3,title_y=0.9, template="plotly_white", updatemenus=[{
+                   title_x=0.3, title_y=0.9, template="plotly_white", updatemenus=[{
                        'type': "buttons", 'direction': 'down',
                        'x': 1.5, 'y': 0.5,
                        'showactive': True, 'active': 0,
@@ -183,12 +184,12 @@ def sum_func(numpy_arr):
 # figure 4 as a pie chart
 fig_pie = go.Figure()
 fig_pie.add_trace(go.Pie(labels=['First dosage', 'Second dosage'], values=[
-               sum_func(df_daily['Erstimpfung'].values), sum_func(df_daily['Zweitimpfung'].values)]))
+    sum_func(df_daily['Erstimpfung'].values), sum_func(df_daily['Zweitimpfung'].values)]))
 fig_pie.update_layout(title='Vaccines distribution',
-                   title_x=0.5,title_y=0.9, template="plotly_white")
-colors=[ 'darkorange', 'lightgreen']
+                      title_x=0.5, title_y=0.9, template="plotly_white")
+colors = ['darkorange', 'lightgreen']
 fig_pie.update_traces(hoverinfo='label+percent', textinfo='value', textfont_size=20,
-                  marker=dict(colors=colors, line=dict(color='#000000', width=2)))
+                      marker=dict(colors=colors, line=dict(color='#000000', width=2)))
 # Preparing the slider dates
 BY['Date'] = pd.to_datetime(BY['Date'], errors='coerce')
 
@@ -196,7 +197,7 @@ crop_30 = []
 
 for s in range(0, len(BY['Date'])-1, 30):
     crop_30.append(BY.iloc[s, 1])
-crop_30.append(BY.iloc[-1,1])
+crop_30.append(BY.iloc[-1, 1])
 
 # print(crop_30)
 date = [x for x in range(len(BY['Date'].unique()))]
@@ -210,7 +211,7 @@ dates_30.append(date[-1])
 #print (crop_30)
 
 
-def auto_gendict (column):
+def auto_gendict(column):
     """
     in order to manage huge amount of options in the dropdown this function auto generations a dictonary from a given column
     this will be passed after to the option argument in the dcc component
@@ -220,14 +221,15 @@ def auto_gendict (column):
     Returns:
         [dict]: a dictionany with label and value set to a numerical index
     """
-    dict_gen=[]
-    j=0
+    dict_gen = []
+    j = 0
     for i in column:
         dict_gen.append({'label': i, 'value': j})
-        j+=1
+        j += 1
     return dict_gen
-    
-print ()
+
+
+print()
 
 
 # application layout
@@ -263,7 +265,7 @@ app.layout = html.Div([
             min=dates_30[0],
             max=dates_30[-1],
             marks={numd: date.strftime('%y-%m-%d')
-                    for numd, date in zip(dates_30, crop_30)},
+                   for numd, date in zip(dates_30, crop_30)},
             step=dates_30[1]-dates_30[0]
 
         ),
@@ -302,12 +304,13 @@ app.layout = html.Div([
     html.Br(),
     html.Br(),
     html.Br(),
-    html.Center(html.Label('Vaccination Progress',style={'fontSize':25,'color':'#0065bd','marginBottom': 10, 'marginTop': 25})),
-        html.Center(dcc.Markdown("The graphs below show the daily vaccines given and their classification if they were given as first dosage or second as well as the total vaccines and its  distribution",
-         style={
-                     'color': '#000000'})),
+    html.Center(html.Label('Vaccination Progress', style={
+                'fontSize': 25, 'color': '#0065bd', 'marginBottom': 10, 'marginTop': 25})),
+    html.Center(dcc.Markdown("The graphs below show the daily vaccines given and their classification if they were given as first dosage or second as well as the total vaccines and its  distribution",
+                             style={
+                                 'color': '#000000'})),
     html.Div([
-        
+
         dcc.Graph(
             figure=fig3
         )
@@ -321,15 +324,16 @@ app.layout = html.Div([
     ],
         style={'width': '30%', 'display': 'inline-block', 'float': 'right'},
     ),
-     html.Br(),
     html.Br(),
-    html.Center(html.Label('Leading vaccine manufacturers',style={'fontSize':25,'color':'#0065bd','marginBottom': 10, 'marginTop': 25})),
+    html.Br(),
+    html.Center(html.Label('Leading vaccine manufacturers', style={
+                'fontSize': 25, 'color': '#0065bd', 'marginBottom': 10, 'marginTop': 25})),
     html.Div([
-        # too many values in the dropdown => auto generated dictionnay 
+        # too many values in the dropdown => auto generated dictionnay
         dcc.Dropdown(
             id='comp_drop',
             options=auto_gendict(df_2comp['Bundesland'].unique()),
-            value = [i for i in range(4)],
+            value=[i for i in range(4)],
             multi=True
 
         ),
@@ -341,9 +345,9 @@ app.layout = html.Div([
             ],
             value=['First dosage'],
             labelStyle={'display': 'inline-block'}
-        ),  
+        ),
         dcc.Graph(
-            id ="vacc_comp"
+            id="vacc_comp"
         )
     ],
         style={'width': '100%', 'display': 'inline-block'},
@@ -356,7 +360,8 @@ app.layout = html.Div([
 )
 
 #print (dfs.keys())
-#print(crop_30[-1])
+# print(crop_30[-1])
+
 
 @app.callback(
     Output('7_week_inzidenz', 'figure'),
@@ -438,59 +443,63 @@ def update_2figure(factors):
 
     return fig2
 
-#solved without the need of alternances 
-#red = ["#FF000"+str(i) for i in range (15)]
+# solved without the need of alternances
+# red = ["#FF000"+str(i) for i in range (15)]
+
 
 @app.callback(
     Output('vacc_comp', 'figure'),
     Input('comp_drop', 'value'),
     Input('check_dos', 'value'))
-def update_vacfig(state,dosage):
+def update_vacfig(state, dosage):
+    """dynamic callback function to display type of vaccine used per selected state and dosage
+    Args:
+        state (list of strings):take the value of the indexselected 
+        dosage ([str]): string that works as a key to know which data frame should be used
+
+    Returns:
+        [Figure]: A figure
+    """
     figcomp = go.Figure()
     print(dosage)
     duplicate_legend_fix = 0
-    for i in state :
+    for i in state:
         duplicate_legend_fix = duplicate_legend_fix + 1
-        for j in dosage :
-                # avoid legends being duplicated so showlegend true only in first case
-                
-                if duplicate_legend_fix == 1:
-                    figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=df_comp[j].iloc[[i],2],text=df_comp[j].iloc[[i],2] ,
-                                                        marker={'color' :'orange'},textposition='auto', name = 'BioNTech',showlegend=True))
-                    figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=df_comp[j].iloc[[i],3],text=df_comp[j].iloc[[i],3] ,
-                                                        marker={'color' :'green'},textposition='auto',name = 'Moderna',showlegend=True))
-                    #astrazeneca exists only in first given the data till 03/20/2021
-                    if (j== 'First dosage'):
-                        figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=df_comp[j].iloc[[i],4],text=df_comp[j].iloc[[i],4] ,
-                                                            marker={'color' :'yellow'},textposition='auto',name = 'AstraZeneca',showlegend=True))
-                    else :
-                        # Not leaving empty but plotting with 0 
-                        y_0 = np.zeros(len(df_1comp.iloc[:,0].values.shape))
-                        figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=y_0,text='0' ,
-                                                        marker={'color' :'yellow'},textposition='auto',name = 'AstraZeneca',showlegend=True))
-                else : 
-                    figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=df_comp[j].iloc[[i],2],text=df_comp[j].iloc[[i],2] ,
-                                                        marker={'color' :'orange'},textposition='auto', name = 'BioNTech',showlegend=False))
-                    figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=df_comp[j].iloc[[i],3],text=df_comp[j].iloc[[i],3] ,
-                                                        marker={'color' :'green'},textposition='auto',name = 'Moderna',showlegend=False))
-                    #astrazeneca exists only in first given the data till 03/20/2021
-                    if (j== 'First dosage'):
-                        figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=df_comp[j].iloc[[i],4],text=df_comp[j].iloc[[i],4] ,
-                                                            marker={'color' :'yellow'},textposition='auto',name = 'AstraZeneca',showlegend=False))
-                    else :
-                        # Not leaving empty but plotting with 0 
-                        y_0 = np.zeros(len(df_1comp.iloc[:,0].values.shape))
-                        figcomp= figcomp.add_trace( go.Bar (x=df_comp[j].iloc[[i],0],y=y_0,text='0' ,
-                                                        marker={'color' :'yellow'},textposition='auto',name = 'AstraZeneca',showlegend=False))
-                        
-                
+        for j in dosage:
+            # avoid legends being duplicated so showlegend true only in first case
+
+            if duplicate_legend_fix == 1:
+                figcomp = figcomp.add_trace(go.Bar(x=df_comp[j].iloc[[i], 0], y=df_comp[j].iloc[[i], 2], text=df_comp[j].iloc[[i], 2],
+                                                   marker={'color': 'orange'}, textposition='auto', name='BioNTech'+ ' ' + j, showlegend=True))
+                figcomp = figcomp.add_trace(go.Bar(x=df_comp[j].iloc[[i], 0], y=df_comp[j].iloc[[i], 3], text=df_comp[j].iloc[[i], 3],
+                                                   marker={'color': 'green'}, textposition='auto', name='Moderna' + ' ' + j, showlegend=True))
+                # astrazeneca exists only in first given the data till 03/20/2021
+                if j == 'First dosage':
+                    figcomp = figcomp.add_trace(go.Bar(x=df_comp[j].iloc[[i], 0], y=df_comp[j].iloc[[i], 4], text=df_comp[j].iloc[[i], 4],
+                                                       marker={'color': 'yellow'}, textposition='auto', name='AstraZeneca' + ' ' + j, showlegend=True))
+                else:
+                    # Not leaving empty but plotting with 0
+                    y_0 = np.zeros(len(df_1comp.iloc[:, 0].values.shape))
+                    figcomp = figcomp.add_trace(go.Bar(x=df_comp[j].iloc[[i], 0], y=y_0, text='0',
+                                                       marker={'color': 'yellow'}, textposition='auto', name='AstraZeneca' + ' ' + j, showlegend=True))
+            else:
+                figcomp = figcomp.add_trace(go.Bar(x=df_comp[j].iloc[[i], 0], y=df_comp[j].iloc[[i], 2], text=df_comp[j].iloc[[i], 2],
+                                                   marker={'color': 'orange'}, textposition='auto', name='BioNTech', showlegend=False))
+                figcomp = figcomp.add_trace(go.Bar(x=df_comp[j].iloc[[i], 0], y=df_comp[j].iloc[[i], 3], text=df_comp[j].iloc[[i], 3],
+                                                   marker={'color': 'green'}, textposition='auto', name='Moderna', showlegend=False))
+                # astrazeneca exists only in first given the data till 03/20/2021
+                if (j == 'First dosage'):
+                    figcomp = figcomp.add_trace(go.Bar(x=df_comp[j].iloc[[i], 0], y=df_comp[j].iloc[[i], 4], text=df_comp[j].iloc[[i], 4],
+                                                       marker={'color': 'yellow'}, textposition='auto', name='AstraZeneca', showlegend=False))
+                else:
+                    # Not leaving empty but plotting with 0
+                    y_0 = np.zeros(len(df_1comp.iloc[:, 0].values.shape))
+                    figcomp = figcomp.add_trace(go.Bar(x=df_comp[j].iloc[[i], 0], y=y_0, text='0',
+                                                       marker={'color': 'yellow'}, textposition='auto', name='AstraZeneca', showlegend=False))
+
     figcomp.update_layout(title="Vaccines used depending on the state",
-                       title_x=0.5, template="plotly_white")
+                          title_x=0.5, template="plotly_white")
     return figcomp
-
-
-
-
 
 
 if __name__ == '__main__':
