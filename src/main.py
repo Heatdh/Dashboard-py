@@ -24,7 +24,7 @@ df_vac2_repartion = pd.read_csv(
     Path(__file__).parent.parent / 'dataset/second dosage.csv')
 
 #dict for the checklist
-dict_repartition={'First dosage repartion':df_vac1_repartion,'Second dosage repartion':df_vac2_repartion}
+df_repartition={'First dosage repartion':df_vac1_repartion,'Second dosage repartion':df_vac2_repartion}
 df_daily = pd.read_csv(
     Path(__file__).parent.parent / 'dataset/Dailyvac.csv')
 
@@ -111,7 +111,7 @@ logo_base64 = base64.b64encode(open(tumlogo, 'rb').read()).decode('ascii')
 # creating second figure
 # it will be inside the callback
 # Dropdown fig dict to generate 2nd figure
-factors_dict = {'Indication per age': 'Indikation nach Alter*', 'Indication per job': 'Berufliche Indikation*', 'Medical Indication': 'Medizinische Indikation*',
+factors_dict = {'Age': 'Indikation nach Alter*', 'Job': 'Berufliche Indikation*', 'Medical': 'Medizinische Indikation*',
                 'Nursing home residents': 'Pflegeheim-bewohnerIn*'}
 
 # using pure plotly advance interactivity options for the 3rd figure
@@ -176,7 +176,7 @@ def sum_func(numpy_arr):
         numpy_2 ([ar]): [second dosage]
 
     Returns:
-        [type]: [the sum over 2 numpy arrays]
+        [int]: [the sum over 2 numpy arrays]
     """
     sum_pie = 0
     for k in numpy_arr:
@@ -249,6 +249,8 @@ app.layout = html.Div([
     html.Div([
         html.Br(),
         html.Br(),
+        html.Center(html.Label('Last week Covid-19 cases overview', style={
+                'fontSize': 25, 'color': '#0065bd', 'marginBottom': 10, 'marginTop': 25})),
         dcc.Markdown("Please Select **cities** for the visualization of **the 7 day incidence** :",
                      style={'color': '#000000'}),
         dcc.Dropdown(
@@ -278,26 +280,28 @@ app.layout = html.Div([
 
         ),
         dcc.Graph(
-            id='7_week_inzidenz'
+            id='7_week_incidence'
 
         )
-    ], style={'width': '55%', 'display': 'inline-block'}),
+    ], style={'width': '100%', 'display': 'inline-block'}),
     html.Div([
         html.Br(),
         html.Br(),
+        html.Center(html.Label('Vaccine repartion per Indication', style={
+                'fontSize': 25, 'color': '#0065bd', 'marginBottom': 10, 'marginTop': 25})),
         dcc.Markdown(" Select the **factors**  to see their effect and importance in the **vaccine's** progress  in **german cities** :",
                      style={'color': '#000000'}),
         dcc.Dropdown(
             id='drop_fac',
             options=[
-                {'label': 'Age', 'value': 'Indication per age'},
-                {'label': 'Job', 'value': 'Indication per job'},
-                {'label': 'Medical Staff', 'value': 'Medical Indication'},
+                {'label': 'Age', 'value': 'Age'},
+                {'label': 'Job', 'value': 'Job'},
+                {'label': 'Medical condition', 'value': 'Medical'},
                 {'label': 'Nursing house residents',
                     'value': 'Nursing home residents'}
             ],
-            value=['Indication per age', 'Indication per job',
-                   'Medical Indication', 'Nursing home residents'],
+            value=['Age', 'Job',
+                   'Medical', 'Nursing home residents'],
             multi=True
 
         ),
@@ -313,7 +317,7 @@ app.layout = html.Div([
             id='factors',
         )
     ],
-        style={'width': '40%', 'display': 'inline-block', 'float': 'right'},
+        style={'width': '100%', 'display': 'inline-block'},
 
 
     ),
@@ -384,18 +388,18 @@ print (dates_30)
 
 
 @app.callback(
-    Output('7_week_inzidenz', 'figure'),
+    Output('7_week_incidence', 'figure'),
     Input('city_selected', 'value'),
     Input('int_slider', 'value'))
-def update_figure(selected_city,interval):
-    """[summary]
+def update_figure_7day(selected_city,interval):
+    """slice the data for a selected_city given an interval and return a figure
 
     Args:
         selected_city (List of strings ): gets a list of strings that will be used as a dict keys
-        interval (List of int):
+        interval (List of int)
 
     Returns:
-        Figure: [description]
+        Figure: an updatable figure that is manageable thorugh dropdowns and slider
     """
     print(interval)
     start_date= interval[0]
@@ -407,26 +411,14 @@ def update_figure(selected_city,interval):
         fig = fig.add_trace(go.Scatter(x=df_aux["Date"],
                                        y=df_aux["Cases_Last_Week"],
                                        name=i))
-        # Display the maximum of the new selection and global once there are 5 states
-        """y_inter = max(df_aux["Cases_Last_Week"])
-        state = i
-        s = df_aux["Cases_Last_Week"].idxmax()
-        xmax_loc = df_aux.iloc[s, 1]
-        ymax_loc = log10(y_inter)
-        max_loc_anno = {
-            'x': xmax_loc, 'y': ymax_loc,
-            'showarrow': True, 'arrowhead': 3,
-            'text': 'the Maximum in {} n={}  \n @{}'.format(state, ymax_loc, xmax_loc),
-            'font': {'size': 10, 'color': 'black'}
-        }
-        fig.update_layout({'annotations': [max_loc_anno]})"""
-
+ 
     fig.update_xaxes(title_text='Date')
-    fig.update_yaxes(type="log", title_text='Cases Last Week')
-    fig.update_layout(title='7 day incidence',
+    fig.update_yaxes(type="log", title_text='n/week')
+    fig.update_layout(title='7-day Incidence of Covid-cases',
                       title_x=0.5, template="plotly_white")
     #global max
     var_ann = global_max_annotation()
+    # max in case of all state selected and duration where the global exists
     if len(selected_city) == 5 and (end>var_ann[0]  ):
         fig.update_layout({'annotations': [var_ann[1]]})
 
@@ -435,22 +427,31 @@ def update_figure(selected_city,interval):
 
 @app.callback(
     Output('factors', 'figure'),
-    Input('drop_fac', 'value'))
-def update_2figure(factors):
+    Input('drop_fac', 'value'),
+    Input('repartion', 'value'),)
+def update_indication_figure(factors,rep):
     """[summary]
 
     Args:
-        factors ([type]): [description]
+        factors (list of strings):  indecations to show 
+        rep (string): used as  a key to df_repartition to select which dataframe to use
 
     Returns:
-        [type]: [description]
+        figure: A figure based on the number of selected dropdown values
     """
     fig2 = go.Figure()
     for j in factors:
-        fig2 = fig2.add_trace(
-            go.Bar(x=df_vac1_repartion['Bundesland'], y=df_vac1_repartion[factors_dict[j]], name=j))
+        for dos in rep:
+            if dos == 'First dosage repartion':
+                fig2 = fig2.add_trace(
+                    go.Bar(x=df_repartition[dos]['Bundesland'], y=df_repartition[dos][factors_dict[j]], name= '1 dossage:'+ j +' indication'))
+            else :
+                 fig2 = fig2.add_trace(
+                    go.Bar(x=df_repartition[dos]['Bundesland'], y=df_repartition[dos][factors_dict[j]], name='2 dossage:'+ j +' indication'))
     fig2.update_layout(title="Vaccine repartition due to factors",
                        title_x=0.5, template="plotly_white")
+    fig2.update_layout({'xaxis': {'title': 'State'}, 'yaxis': {
+                   'title': 'Number of doses'}})
 
     return fig2
 
