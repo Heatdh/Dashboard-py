@@ -160,7 +160,7 @@ fig3.update_layout({'xaxis': {'title': 'Date'}, 'yaxis': {
 fig3.update_layout(title="Daily vaccination progress",
                    title_x=0.3, title_y=0.9, template="plotly_white", updatemenus=[{
                        'type': "buttons", 'direction': 'down',
-                       'x': 1.5, 'y': 0.5,
+                       'x': 1.15, 'y': 0.5,
                        'showactive': True, 'active': 0,
                        'buttons': showoptions}])
 
