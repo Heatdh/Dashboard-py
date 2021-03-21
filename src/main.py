@@ -49,7 +49,8 @@ SN = pd.read_csv(
     "https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-SN.tsv", sep="\t")
 TH = pd.read_csv(
     "https://raw.githubusercontent.com/entorb/COVID-19-Coronavirus-German-Regions/master/data/de-states/de-state-TH.tsv", sep="\t")
-BY.to_csv('check.csv')
+#just to visualize them
+#BY.to_csv('check.csv')
 
 # dataframes dictionary necessary for the legends
 dfs = {'Bayern': BY, 'Berlin': BE, 'Nordhein-Westfalen': NW,
