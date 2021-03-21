@@ -265,6 +265,8 @@ app.layout = html.Div([
                    'Sachsen', 'Thüringen'],
             multi=True
         ),
+        dcc.Markdown("Select **The interval** of the visaluzation:",
+                     style={'color': '#000000'}),
         dcc.RangeSlider(
             id='int_slider',
             min=dates_30[0],
@@ -305,7 +307,7 @@ app.layout = html.Div([
                 {'label': 'First dosage repartion', 'value': 'First dosage repartion'},
                 {'label': 'Second dosage repartion', 'value': 'Second dosage repartion'}
             ],
-            value=['First dosage'],
+            value=['First dosage repartion'],
             labelStyle={'display': 'inline-block'}),
         dcc.Graph(
             id='factors',
@@ -338,6 +340,7 @@ app.layout = html.Div([
     ],
         style={'width': '30%', 'display': 'inline-block', 'float': 'right'},
     ),
+    html.Br(),
     html.Br(),
     html.Br(),
     html.Center(html.Label('Leading vaccine manufacturers', style={
@@ -388,10 +391,11 @@ def update_figure(selected_city,interval):
     """[summary]
 
     Args:
-        selected_city ([type]): [description]
+        selected_city (List of strings ): gets a list of strings that will be used as a dict keys
+        interval (List of int):
 
     Returns:
-        [type]: [description]
+        Figure: [description]
     """
     print(interval)
     start_date= interval[0]
@@ -419,22 +423,6 @@ def update_figure(selected_city,interval):
 
     fig.update_xaxes(title_text='Date')
     fig.update_yaxes(type="log", title_text='Cases Last Week')
-    
-    '''date_buttons = [
-        {'step': "all", 'stepmode': "todate", 'label': "All"},
-        {'count': 12, 'step': "month",
-         'stepmode': "todate", 'label': "1Y"},
-        {'count': 6, 'step': "month",
-         'stepmode': "todate", 'label': "6M"},
-        {'count': 3, 'step': "month",
-         'stepmode': "todate", 'label': "3M"}
-
-    ]
-    fig.update_layout(
-        {'xaxis':      {'rangeselector':
-                        {'buttons': date_buttons}}})
-    #print (date_buttons)'''
-
     fig.update_layout(title='7 day incidence',
                       title_x=0.5, template="plotly_white")
     #global max
